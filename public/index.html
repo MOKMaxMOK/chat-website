@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Max Chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin: 20px 0;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #ccc;
+            margin: 0 5%;
+        }
+        .chat-box {
+            width: 95%;
+            height: 70vh;
+            margin: 20px auto;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .chat-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .chat-box li {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            background-color: #e9ecef;
+            word-wrap: break-word;
+        }
+        .chat-box li .user {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .input-container {
+            position: fixed;
+            display: flex;
+            bottom: 3%;
+            width: 100%;
+            justify-content: center;
+            background-color: #fff;
+            padding: 10px 0;
+        }
+        .input {
+            width: 80%;
+            height: 30px;
+            font-size: 18px;
+            margin-left: 5%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .sent {
+            margin-left: 3%;
+            padding: 8px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .sent:hover {
+            background-color: #0056b3;
+        }
+        .nickname-container {
+            text-align: center;
+            margin: 10px 0;
+        }
+        .setname{
+            border:black 1px solid;
+            border-radius:25px;
+            background-color: bisque;
+
+        }
+    </style>
+</head>
+<body>
+    <h1>Max Chat</h1>
+    <hr>
+    <div class="nickname-container">
+        <input type="text" class="nickname" placeholder="input you name" required>
+        <button class="setname" onclick="setname()">Set</button>
+
+    </div>
+    <div class="chat-box">
+        <ul id="messages"></ul>
+    </div>
+    <form class="input-container" id="chat-form">
+        <input type="text" id="input" class="input" autocomplete="off" placeholder="input message...">
+        <button type="submit" class="sent">Send</button>
+    </form>
+
+    <script>
+        const socket = io();
+        const form = document.getElementById('chat-form');
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
+        const input_nickname = document.querySelector('.nickname');
+
+        let nickname=localStorage.getItem("nickname") || "匿名用戶";
+        input_nickname.value=nickname==='匿名用戶' ? '' : nickname;
+
+        function setname(){
+            const name = input_nickname.value.trim();
+            if(name){
+                nickname=name;
+                localStorage.setItem("nickname", nickname);
+                alert(`your name has been set to: ${nickname}`);
+            } else {
+                alert('Name cannot be empty. Please enter a valid name.');
+            }
+        }
+
+
+        // 檢查 Socket.IO 連線狀態
+        socket.on('connect', () => {
+            console.log('已連線到 Socket.IO 伺服器');
+        });
+        socket.on('connect_error', (err) => {
+            console.error('Socket.IO 連線錯誤:', err.message);
+        });
+
+        // 載入歷史訊息
+        socket.on('history', (history) => {
+            console.log('收到歷史訊息:', history);
+            history.forEach(msg => {
+                const item = document.createElement('li');
+                item.innerHTML = `<span class="user">${msg.user}</span>: ${msg.message}`;
+                messages.appendChild(item);
+            });
+            scrollToBottom();
+        });
+
+        // 接收新訊息
+        socket.on('chat message', (msg) => {
+            console.log('收到新訊息:', msg);
+            const item = document.createElement('li');
+            item.innerHTML = `<span class="user">${msg.user}</span>: ${msg.message}`;
+            messages.appendChild(item);
+            scrollToBottom();
+        });
+
+        // 發送訊息
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            console.log('表單提交，輸入值:', input.value,'暱稱:', nickname);
+            if (input.value.trim()) {
+                socket.emit('chat message', {
+                    user: nickname,
+                    text: input.value
+                });
+                input.value = '';
+            }
+        });
+
+        // 支援按 Enter 鍵發送
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // 自動滾動到最新訊息
+        function scrollToBottom() {
+            const chatBox = document.querySelector('.chat-box');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        nickname_input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                setname();
+            }
+        });
+    </script>
+</body>
+</html>
