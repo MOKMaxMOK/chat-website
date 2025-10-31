@@ -43,15 +43,11 @@ command:
   ```
 - **Alternative**: Download the repository as a ZIP file from GitHub and extract it, then skip to section 2.3.
 
-#### 2.3 Install MongoDB (Optional for Local Testing)
-- Install MongoDB Community Edition from [mongodb.com](https://www.mongodb.com/try/download/community).
-- Start MongoDB locally:
-  ```bash
-  mongod
+
   ```
 - Alternatively, use MongoDB Atlas (cloud-hosted MongoDB) and obtain a connection string (e.g., `mongodb+srv://<user>:<password>@cluster0.mongodb.net/chatdb`).
 
-#### 2.4 Test Locally (Recommended)
+#### 2.3 Test Locally (Recommended)
 - Install dependencies:
   ```bash
   cd chat-website
@@ -85,9 +81,6 @@ This section demonstrates deploying the chat website to an AWS EC2 instance usin
 
 #### 3.1 Create an EC2 Instance
 - **create EC2**
-- **Settings**:
-  - **AMI**: Choose `Amazon Linux 2023 AMI`.
-  - **Instance Type**: Select `t2.micro` 
   - **Key Pair**: Create a new key pair (e.g., `chat-website-key.pem`) or select an existing one. Download and save the `.pem` file securely.
   - **Security Group**: Create a new security group with:
     - **HTTP (port 80)**: Allow inbound traffic for web access.
